@@ -714,6 +714,22 @@ var flower = (function () {
         }
 
     });
+	
+    function triggerTask(task_name, args, kwargs, options) {
+        var c = confirm("Are you sure you would like to trigger " + task_name + " again?");
+        if (c) {
+            return $.ajax({
+                url: url_prefix() + '/api/task/async-apply/' + task_name,
+                data: JSON.stringify({ args: args, kwargs: kwargs, options: options }),
+                type: "POST",
+                dataType: "json"
+            }).done(function(json) {
+                alert("Task " + task_name + " triggered!");
+            }).fail(function(data) {
+                alert("Failed to trigger task.");
+            });
+        }
+    }
 
     $(document).ready(function () {
         if (!active_page('/tasks')) {
@@ -734,7 +750,7 @@ var flower = (function () {
                 url: url_prefix() + '/tasks/datatable'
             },
             order: [
-                [7, "asc"]
+                [7, "desc"]
             ],
             oSearch: {
                 "sSearch": $.urlParam('state') ? 'state:' + $.urlParam('state') : ''
@@ -744,7 +760,7 @@ var flower = (function () {
                 data: 'name',
                 visible: isColumnVisible('name'),
                 render: function (data, type, full, meta) {
-                    return data;
+                    return '<a href="#" onClick="flower.triggerTask(\'' + data + '\')">' + data + '</a>';
                 }
             }, {
                 targets: 1,
@@ -866,6 +882,7 @@ var flower = (function () {
         on_cancel_task_filter: on_cancel_task_filter,
         on_task_revoke: on_task_revoke,
         on_task_terminate: on_task_terminate,
+        triggerTask: triggerTask,
     };
 
 }(jQuery));

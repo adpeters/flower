@@ -27,16 +27,14 @@ class ControlHandler(BaseHandler):
     @gen.coroutine
     def update_workers(cls, app, workername=None):
         logger.debug("Updating %s worker's cache...", workername or 'all')
-
-        futures = []
+        # github.com/mher/flower/issues/788
+        results = []
         destination = [workername] if workername else None
         timeout = app.options.inspect_timeout / 1000.0
         inspect = app.capp.control.inspect(
             timeout=timeout, destination=destination)
         for method in cls.INSPECT_METHODS:
-            futures.append(app.delay(getattr(inspect, method)))
-
-        results = yield futures
+            results.append(getattr(inspect, method)())
 
         for i, result in enumerate(results):
             if result is None:
